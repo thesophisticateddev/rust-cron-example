@@ -33,8 +33,6 @@ fn get_notification() -> CreateNotification {
     return data;
 }
 
-
-
 pub async fn start_scheduler() {
     let interval = every(15).seconds().in_timezone(&Utc).perform(|| async {
         let mut dbconn = get_connection().await;
@@ -42,6 +40,9 @@ pub async fn start_scheduler() {
         let transaction_result = dbconn
             .transaction::<_, diesel::result::Error, _>(|conn| {
                 async move {
+                    let total_notifications = notifications::table.count().execute(conn).await?;
+                    println!("Total notifications: {:?}", total_notifications);
+
                     let n_data = get_notification();
                     diesel::insert_into(notifications::table)
                         .values(n_data)
@@ -57,7 +58,6 @@ pub async fn start_scheduler() {
             Ok(_) => println!("Notification created - {:?}", Local::now()),
             Err(e) => println!("Error creating notification: {:?}", e),
         }
-
 
         println!("schedule_task event - {:?}", Local::now())
     });
