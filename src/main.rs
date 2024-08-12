@@ -1,11 +1,9 @@
 use crate::scheduler::start_scheduler;
 use actix_web::{get, App, HttpResponse, HttpServer, Result};
 
+mod model;
 mod scheduler;
 mod schema;
-mod model;
-
-
 
 #[get("/health")]
 pub async fn health() -> Result<HttpResponse> {
